@@ -14,35 +14,46 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    var data = Provider.of<ExpanseProvider>(context, listen: false);
+    var data = Provider.of<ExpanseProvider>(context, listen: true);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Expense tracker'),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: data.registerdexpense.length,
-                itemBuilder: (context, index) {
-                  return ExpanseCard(index: index);
-                },
-              ),
-            ),
-            Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (context) {
-                          return AddExpanse();
+        appBar: AppBar(title: const Text('Expense tracker'), actions: [
+          IconButton(
+              onPressed: () {
+                showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) {
+                      return const AddExpanse();
+                    });
+              },
+              icon: const Icon(Icons.add))
+        ]),
+        body: data.registerdexpense.isEmpty
+            ? const Center(
+                child: Text('There is no expances ,Add some'),
+              )
+            : Column(
+                children: [
+                  Expanded(
+                    child: Consumer<ExpanseProvider>(
+                      builder: (context, value, child) => ListView.builder(
+                        itemCount: data.registerdexpense.length,
+                        itemBuilder: (context, index) {
+                          return Dismissible(
+                            key: ValueKey(data.registerdexpense[index]),
+                            onDismissed: (direction) {
+                              // print(ValueKey(value));
+                              data.removeExpanse(index, context);
+
+                              print("print : ${data.registerdexpense}");
+                            },
+                            child: ExpanseCard(index: index),
+                          );
                         },
-                      );
-                    },
-                    child: const Icon(Icons.add)))
-          ],
-        ));
+                      ),
+                    ),
+                  ),
+                ],
+              ));
   }
 }
